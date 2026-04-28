@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Task Manager</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <h1>&#x1F4DA; Student Task Manager</h1>
+      <span id="task-count" class="badge">0 tasks</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Add Task Form -->
+    <section class="card" id="add-section">
+      <h2>Add New Task</h2>
+      <form id="task-form">
+        <div class="form-row">
+          <input type="text" id="title" placeholder="Task title *" required maxlength="200" />
+          <input type="text" id="subject" placeholder="Subject (e.g. Maths)" maxlength="100" />
+        </div>
+        <div class="form-row">
+          <select id="priority">
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+            <option value="low">Low Priority</option>
+          </select>
+          <input type="date" id="dueDate" />
+          <button type="submit" class="btn btn-primary">+ Add Task</button>
+        </div>
+      </form>
+      <p id="form-error" class="error hidden"></p>
+    </section>
+
+    <!-- Filter Bar -->
+    <section class="filter-bar">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="pending">Pending</button>
+      <button class="filter-btn" data-filter="completed">Completed</button>
+    </section>
+
+    <!-- Task List -->
+    <section id="task-list" class="task-grid">
+      <p class="loading">Loading tasks...</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>DevOps College Project &mdash; Deployed on AWS ECS Fargate</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
