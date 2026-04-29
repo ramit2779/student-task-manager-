@@ -3,12 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                git 'https://github.com/ramit2779/student-task-manager.git'
-            }
-        }
-
         stage('Install Dependencies') {
             steps {
                 dir('app') {
