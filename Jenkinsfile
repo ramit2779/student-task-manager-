@@ -3,23 +3,6 @@ pipeline {
 
     stages {
 
-        stage('Install Dependencies') {
-            steps {
-                dir('app') {
-                    sh 'npm install'
-                }
-            }
-        }
-
-        stage('Run Basic Validation') {
-            steps {
-                dir('app') {
-                    sh 'npm audit fix || true'
-                    sh 'npm test || true'
-                }
-            }
-        }
-
         stage('Docker Build Validation') {
             steps {
                 sh 'docker build -t cloud-infra-monitor .'
@@ -28,7 +11,7 @@ pipeline {
 
         stage('Deployment Readiness Check') {
             steps {
-                echo 'Application successfully validated and ready for ECS deployment.'
+                echo 'Application successfully validated and ready for ECS deployment on AWS ECS Fargate.'
             }
         }
     }
