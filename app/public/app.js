@@ -2,6 +2,8 @@ const API = '/api/tasks';
 let allTasks = [];
 let currentFilter = 'all';
 
+const PRIORITY_LABEL = { high: 'Critical', medium: 'Standard', low: 'Low Impact' };
+
 async function fetchTasks() {
   try {
     const res = await fetch(API);
@@ -10,41 +12,56 @@ async function fetchTasks() {
     renderTasks();
   } catch (err) {
     document.getElementById('task-list').innerHTML =
-      '<p class="empty-state">Could not connect to server.</p>';
+      '<p class="empty-state">Unable to reach monitoring service. Check your connection.</p>';
   }
 }
 
+function updateStats() {
+  const active   = allTasks.filter(t => !t.completed).length;
+  const deployed = allTasks.filter(t =>  t.completed).length;
+  document.getElementById('stat-total').textContent    = allTasks.length;
+  document.getElementById('stat-active').textContent   = active;
+  document.getElementById('stat-deployed').textContent = deployed;
+  document.getElementById('task-count').textContent =
+    `${allTasks.length} resource${allTasks.length !== 1 ? 's' : ''}`;
+}
+
 function renderTasks() {
+  updateStats();
+
   const list = document.getElementById('task-list');
   const filtered = allTasks.filter(t => {
-    if (currentFilter === 'pending') return !t.completed;
-    if (currentFilter === 'completed') return t.completed;
+    if (currentFilter === 'pending')   return !t.completed;
+    if (currentFilter === 'completed') return  t.completed;
     return true;
   });
 
-  document.getElementById('task-count').textContent =
-    `${allTasks.length} task${allTasks.length !== 1 ? 's' : ''}`;
-
   if (filtered.length === 0) {
-    list.innerHTML = '<p class="empty-state">No tasks here. Add one above!</p>';
+    list.innerHTML = '<p class="empty-state">No resources found. Register one above.</p>';
     return;
   }
 
-  list.innerHTML = filtered.map(task => `
-    <div class="task-card priority-${task.priority} ${task.completed ? 'completed' : ''}" data-id="${task.id}">
+  list.innerHTML = filtered.map(r => `
+    <div class="task-card priority-${r.priority} ${r.completed ? 'completed' : ''}" data-id="${r.id}">
       <div class="task-info">
-        <div class="task-title">${escapeHtml(task.title)}</div>
+        <div class="task-header">
+          <div class="task-title">${escapeHtml(r.title)}</div>
+          <span class="status-badge ${r.completed ? 'status-deployed' : 'status-active'}">
+            &#x25CF; ${r.completed ? 'Deployed' : 'Active'}
+          </span>
+        </div>
         <div class="task-meta">
-          ${task.subject ? `<span>&#x1F4D6; ${escapeHtml(task.subject)}</span>` : ''}
-          <span>&#x26A1; ${capitalize(task.priority)}</span>
-          ${task.dueDate ? `<span>&#x1F4C5; Due ${task.dueDate}</span>` : ''}
+          ${r.subject  ? `<span>&#x1F527; ${escapeHtml(r.subject)}</span>` : ''}
+          <span>&#x26A1; ${PRIORITY_LABEL[r.priority] || capitalize(r.priority)}</span>
+          ${r.dueDate  ? `<span>&#x1F4C5; Deploy by: ${r.dueDate}</span>` : ''}
         </div>
       </div>
       <div class="task-actions">
-        <button class="btn btn-success" onclick="toggleTask('${task.id}', ${task.completed})">
-          ${task.completed ? 'Undo' : 'Done'}
-        </button>
-        <button class="btn btn-danger" onclick="deleteTask('${task.id}')">Delete</button>
+        ${r.completed
+          ? `<button class="btn btn-reactivate" onclick="toggleTask('${r.id}', true)">Reactivate</button>`
+          : `<button class="btn btn-success"    onclick="toggleTask('${r.id}', false)">Mark Deployed</button>`
+        }
+        <button class="btn btn-danger" onclick="deleteTask('${r.id}')">Remove</button>
       </div>
     </div>
   `).join('');
@@ -56,10 +73,10 @@ async function addTask(e) {
   errEl.classList.add('hidden');
 
   const body = {
-    title: document.getElementById('title').value.trim(),
-    subject: document.getElementById('subject').value.trim(),
+    title:    document.getElementById('title').value.trim(),
+    subject:  document.getElementById('subject').value.trim(),
     priority: document.getElementById('priority').value,
-    dueDate: document.getElementById('dueDate').value,
+    dueDate:  document.getElementById('dueDate').value,
   };
 
   try {
@@ -70,7 +87,7 @@ async function addTask(e) {
     });
     const json = await res.json();
     if (!res.ok) {
-      errEl.textContent = json.error || 'Failed to add task';
+      errEl.textContent = json.error || 'Failed to register resource';
       errEl.classList.remove('hidden');
       return;
     }
@@ -78,7 +95,7 @@ async function addTask(e) {
     renderTasks();
     e.target.reset();
   } catch {
-    errEl.textContent = 'Network error. Try again.';
+    errEl.textContent = 'Network error. Please try again.';
     errEl.classList.remove('hidden');
   }
 }
@@ -96,18 +113,18 @@ async function toggleTask(id, isCompleted) {
       if (idx !== -1) allTasks[idx] = json.data;
       renderTasks();
     }
-  } catch { /* silently ignore network errors on toggle */ }
+  } catch { /* ignore transient network errors */ }
 }
 
 async function deleteTask(id) {
-  if (!confirm('Delete this task?')) return;
+  if (!confirm('Remove this resource from monitoring?')) return;
   try {
     const res = await fetch(`${API}/${id}`, { method: 'DELETE' });
     if (res.ok) {
       allTasks = allTasks.filter(t => t.id !== id);
       renderTasks();
     }
-  } catch { /* silently ignore network errors on delete */ }
+  } catch { /* ignore transient network errors */ }
 }
 
 function escapeHtml(str) {

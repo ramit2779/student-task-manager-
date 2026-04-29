@@ -3,34 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Task Manager</title>
+  <title>Cloud Infrastructure Monitor</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <div class="header-inner">
-      <h1>&#x1F4DA; Student Task Manager</h1>
-      <span id="task-count" class="badge">0 tasks</span>
+      <div class="header-brand">
+        <span class="header-icon">&#x2601;</span>
+        <div>
+          <h1>Cloud Infrastructure Monitor</h1>
+          <p class="header-sub">AWS ECS Fargate &bull; us-east-1 &bull; Real-time Status</p>
+        </div>
+      </div>
+      <span id="task-count" class="badge">0 resources</span>
     </div>
   </header>
 
   <main>
-    <!-- Add Task Form -->
+    <!-- Stats Bar -->
+    <section class="stats-bar">
+      <div class="stat-card">
+        <span class="stat-label">Total Resources</span>
+        <span class="stat-value" id="stat-total">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Active</span>
+        <span class="stat-value stat-active" id="stat-active">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Deployed</span>
+        <span class="stat-value stat-deployed" id="stat-deployed">0</span>
+      </div>
+    </section>
+
+    <!-- Register Resource Form -->
     <section class="card" id="add-section">
-      <h2>Add New Task</h2>
+      <h2>Register Infrastructure Resource</h2>
       <form id="task-form">
         <div class="form-row">
-          <input type="text" id="title" placeholder="Task title *" required maxlength="200" />
-          <input type="text" id="subject" placeholder="Subject (e.g. Maths)" maxlength="100" />
+          <input type="text" id="title" placeholder="Resource name * (e.g. prod-ecs-cluster)" required maxlength="200" />
+          <input type="text" id="subject" placeholder="Service type (e.g. ECS, RDS, Lambda)" maxlength="100" />
         </div>
         <div class="form-row">
           <select id="priority">
-            <option value="medium">Medium Priority</option>
-            <option value="high">High Priority</option>
-            <option value="low">Low Priority</option>
+            <option value="medium">Standard Priority</option>
+            <option value="high">Critical Priority</option>
+            <option value="low">Low Impact</option>
           </select>
-          <input type="date" id="dueDate" />
-          <button type="submit" class="btn btn-primary">+ Add Task</button>
+          <input type="date" id="dueDate" title="Deployment date" />
+          <button type="submit" class="btn btn-primary">+ Register Resource</button>
         </div>
       </form>
       <p id="form-error" class="error hidden"></p>
@@ -38,19 +60,20 @@
 
     <!-- Filter Bar -->
     <section class="filter-bar">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="pending">Pending</button>
-      <button class="filter-btn" data-filter="completed">Completed</button>
+      <span class="filter-label">Filter:</span>
+      <button class="filter-btn active" data-filter="all">All Resources</button>
+      <button class="filter-btn" data-filter="pending">Active</button>
+      <button class="filter-btn" data-filter="completed">Deployed</button>
     </section>
 
-    <!-- Task List -->
+    <!-- Resource List -->
     <section id="task-list" class="task-grid">
-      <p class="loading">Loading tasks...</p>
+      <p class="loading">Fetching infrastructure resources...</p>
     </section>
   </main>
 
   <footer>
-    <p>DevOps College Project &mdash; Deployed on AWS ECS Fargate</p>
+    <p>Cloud Infrastructure Monitor &mdash; Docker &bull; AWS ECS Fargate &bull; Terraform &bull; GitHub Actions CI/CD</p>
   </footer>
 
   <script src="app.js"></script>
